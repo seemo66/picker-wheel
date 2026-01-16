@@ -52,6 +52,9 @@ class PickerWheel {
         this.centerCircle = document.createElement('div');
         this.centerCircle.className = 'picker-wheel-center';
         this.centerCircle.textContent = 'SPIN';
+        this.centerCircle.setAttribute('role', 'button');
+        this.centerCircle.setAttribute('tabindex', '0');
+        this.centerCircle.setAttribute('aria-label', 'Spin the wheel');
         
         // Append elements
         this.wrapper.appendChild(this.pointer);
@@ -203,8 +206,8 @@ class PickerWheel {
         }
         
         // Remove from DOM
-        if (this.container && this.wrapper) {
-            this.container.removeChild(this.wrapper);
+        if (this.wrapper) {
+            this.wrapper.remove();
         }
     }
 }
