@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Picker Wheel Demo</title>
+    <link rel="stylesheet" href="picker-wheel.css">
+</head>
+<body class="picker-wheel-demo">
+    <div class="demo-container">
+        <h1>Picker Wheel Demo</h1>
+        
+        <div id="picker-wheel-container"></div>
+        
+        <div class="controls">
+            <button id="spin-button" aria-label="Spin the picker wheel">SPIN</button>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <script src="picker-wheel.js"></script>
+    <script>
+        // Initialize the picker wheel with options
+        const wheel = new PickerWheel('picker-wheel-container', {
+            items: [
+                { label: 'Prize 1', color: '#FF6B6B' },
+                { label: 'Prize 2', color: '#4ECDC4' },
+                { label: 'Prize 3', color: '#45B7D1' },
+                { label: 'Prize 4', color: '#FFA07A' },
+                { label: 'Prize 5', color: '#98D8C8' },
+                { label: 'Prize 6', color: '#F7DC6F' },
+                { label: 'Prize 7', color: '#BB8FCE' },
+                { label: 'Prize 8', color: '#85C1E2' }
+            ],
+            onSpinEnd: function(result) {
+                const resultDiv = document.getElementById('result');
+                resultDiv.textContent = '';
+                const strong = document.createElement('strong');
+                strong.textContent = 'Result: ';
+                resultDiv.appendChild(strong);
+                resultDiv.appendChild(document.createTextNode(result.label));
+            }
+        });
+
+        // Attach spin button
+        document.getElementById('spin-button').addEventListener('click', function() {
+            wheel.spin();
+        });
+    </script>
+</body>
+</html>
