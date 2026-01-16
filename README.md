@@ -90,6 +90,10 @@ To use this picker wheel in your own project:
 
 Open `index.html` in your browser to see a working demo.
 
+## Security Note
+
+The picker wheel uses `Math.random()` for generating random results. This is sufficient for entertainment and demonstration purposes. However, if you're using this wheel for valuable prizes, giveaways, or gambling, you should replace the random number generation with a cryptographically secure alternative (e.g., `crypto.getRandomValues()`) to ensure fairness and prevent predictability.
+
 ## License
 
 Free to use and modify.
