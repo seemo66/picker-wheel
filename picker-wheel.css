@@ -1,10 +1,13 @@
 /* Picker Wheel Styles */
 
-* {
+/* Scoped box-sizing for picker wheel elements */
+.picker-wheel-wrapper,
+.picker-wheel-wrapper * {
     box-sizing: border-box;
 }
 
-body {
+/* Demo-specific styles (optional - remove if integrating into your own page) */
+body.picker-wheel-demo {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;

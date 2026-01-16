@@ -27,6 +27,7 @@ class PickerWheel {
 
         this.isSpinning = false;
         this.currentRotation = 0;
+        this.animationId = null;
         
         this.init();
     }
@@ -165,13 +166,14 @@ class PickerWheel {
             this.draw();
             
             if (progress < 1) {
-                requestAnimationFrame(animate);
+                this.animationId = requestAnimationFrame(animate);
             } else {
+                this.animationId = null;
                 this.onSpinComplete(randomIndex);
             }
         };
         
-        requestAnimationFrame(animate);
+        this.animationId = requestAnimationFrame(animate);
     }
 
     onSpinComplete(winningIndex) {
@@ -194,6 +196,13 @@ class PickerWheel {
     }
 
     destroy() {
+        // Cancel any running animation
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+        
+        // Remove from DOM
         if (this.container && this.wrapper) {
             this.container.removeChild(this.wrapper);
         }
