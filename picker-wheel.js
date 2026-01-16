@@ -56,6 +56,15 @@ class PickerWheel {
         this.centerCircle.setAttribute('tabindex', '0');
         this.centerCircle.setAttribute('aria-label', 'Spin the wheel');
         
+        // Add click and keyboard event handlers to center circle
+        this.centerCircle.addEventListener('click', () => this.spin());
+        this.centerCircle.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.spin();
+            }
+        });
+        
         // Append elements
         this.wrapper.appendChild(this.pointer);
         this.wrapper.appendChild(this.canvas);
