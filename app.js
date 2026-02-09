@@ -67,6 +67,8 @@ class PickerWheel {
     this.loadedFromStorage = false;
     this.initElements();
     this.attachEventListeners();
+    // Preload fanfare audio for mobile compatibility
+    this.initFanfareAudio();
     // Load saved options and enforce unique colors before first render
     this.loadOptions();
     this.loadCounts();
@@ -109,6 +111,19 @@ class PickerWheel {
     this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
   }
 
+  initFanfareAudio() {
+    // Preload fanfare audio to ensure it works on mobile browsers
+    try {
+      this.fanfareAudio = new Audio('https://orangefreesounds.com/wp-content/uploads/2025/11/Winning-fanfare-sound-effect.mp3');
+      this.fanfareAudio.volume = 0.7;
+      this.fanfareAudio.preload = 'auto';
+      // Load the audio file
+      this.fanfareAudio.load();
+    } catch (e) {
+      console.log('Failed to initialize fanfare audio:', e);
+    }
+  }
+
   playClick() {
     if (!this.audioContext) {
       this.initAudio();
@@ -145,9 +160,17 @@ class PickerWheel {
 
   playFanfare() {
     try {
-      const audio = new Audio('https://orangefreesounds.com/wp-content/uploads/2025/11/Winning-fanfare-sound-effect.mp3');
-      audio.volume = 0.7;
-      audio.play().catch(err => console.log('Audio play failed:', err));
+      if (this.fanfareAudio) {
+        // Reset to beginning if already played
+        this.fanfareAudio.currentTime = 0;
+        this.fanfareAudio.play().catch(err => {
+          console.log('Audio play failed:', err);
+          // Fallback: try creating new instance in case of error
+          const audio = new Audio('https://orangefreesounds.com/wp-content/uploads/2025/11/Winning-fanfare-sound-effect.mp3');
+          audio.volume = 0.7;
+          audio.play().catch(err2 => console.log('Fallback audio also failed:', err2));
+        });
+      }
     } catch (e) {
       console.log('Fanfare audio unavailable');
     }
