@@ -1,0 +1,1031 @@
+/* Picker Wheel Styles */
+/*
+  Theme customization:
+  - Update the variables on .demo-container to change fonts and brand colors.
+  - Scoping variables to the widget container prevents conflicts with site-wide variables.
+*/
+
+.demo-container {
+  --font-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --font-heading: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  --color-text: #555;
+  --color-primary: #3fb8af;           /* Buttons background */
+  --color-primary-border: #32938c;    /* Buttons/input border focus */
+  --color-accent: #ee7e8d;            /* Delete/edit accent */
+  --color-modal-bg: #f8f8f8;          /* Winner row background */
+  --color-border: #ddd;               /* Neutral borders */
+  --control-height: 44px;             /* Unified height for input and Add button */
+}
+
+/* Base styles */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+/* Screen-reader-only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.picker-wheel-demo {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scoped box-sizing for picker wheel elements */
+.picker-wheel-wrapper,
+.picker-wheel-wrapper * {
+  box-sizing: border-box;
+}
+
+/* Layout wrapper: mobile-first stack */
+.picker-wheel-wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+/* Right-side controls column */
+.controls-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Demo Container */
+.demo-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: var(--font-base);
+}
+
+.demo-container h1 {
+  text-align: center;
+  font-size: 36px;
+  color: var(--color-text);
+  margin-bottom: 0;
+  font-family: var(--font-heading);
+}
+
+/* Apply heading font stack consistently */
+.demo-container h2,
+.demo-container h3,
+.result-modal-content h2 {
+  font-family: var(--font-heading);
+}
+
+/* Options Input Section */
+.options-input-section {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 0px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  align-content: flex-start; /* prevent line stretching when items wrap */
+  position: relative; /* anchor feedback message without affecting layout */
+}
+
+/* Wheel Section */
+.wheel-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+  min-height: 500px;
+}
+
+.wheel-canvas {
+  width: 100%;
+  max-width: 500px;
+  aspect-ratio: 1;
+  position: relative;
+  overflow: hidden; /* Prevent arrow/shadow from causing horizontal overflow */
+}
+
+.wheel-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-origin: center;
+  will-change: transform;
+}
+.wheel-idle {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-origin: center;
+  will-change: transform;
+}
+
+/* Idle rotation wrapper: rotates subtly when idle */
+@keyframes idle-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.wheel-idle.idle-active {
+  animation: idle-rotate var(--idle-duration, 30s) linear infinite;
+}
+
+/* JS-controlled pause state (tap/spin) */
+.wheel-idle.idle-paused {
+  animation-play-state: paused;
+}
+
+/* Idle rotation wrapper: rotates subtly when idle */
+/* Weight control (button + anchored menu) */
+.weight-control {
+  position: relative;
+  display: inline-block;
+}
+
+.weight-button {
+  background: #fff;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 14px;
+  padding: 6px 10px;
+  margin-right: 8px;
+  min-width: 32px;
+  height: 32px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.weight-button:focus {
+  outline: none;
+  border-color: var(--color-primary-border);
+}
+
+.weight-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  z-index: 20;
+}
+
+.weight-menu.open { display: block; }
+
+.weight-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.weight-option:hover {
+  background: var(--color-modal-bg);
+}
+
+.weight-option.active {
+  background: var(--color-modal-bg);
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .weight-button {
+    font-size: 16px; /* avoids mobile zoom on tap */
+    height: 36px;
+    padding: 8px 12px;
+    min-width: 32px;
+  }
+}
+
+/* Color control (per-option color picker) */
+.color-control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
+}
+
+.color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.color-swatch:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(63, 184, 175, 0.25);
+}
+
+.color-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: auto; /* allow direct taps to open native picker (iOS/WKWebView) */
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+/* Color label removed to save horizontal space */
+/* Spin keyframes (used for CSS-driven spins if needed) */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(var(--rotation, 360deg));
+  }
+}
+
+.wheel-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.wheel-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  /* Create a triangle pointing left (toward wheel) */
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+  border-right: 30px solid var(--color-accent);
+  
+  /* Position on the right side of wheel, middle height */
+  top: 50%;
+  right: 35px;
+  transform: translateY(-50%);
+  
+  z-index: 5;
+}
+
+.wheel-arrow-svg {
+  position: absolute;
+  width: 40px;
+  height: 50px;
+  top: 50%;
+  right: 20px; /* Anchor to the right edge inside canvas */
+  transform: translateY(-50%);
+  z-index: 5;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+}
+
+.spin-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background-color: #fff;
+  border: 3px solid var(--color-text);
+  font-weight: bold;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s, transform 0.2s;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.spin-btn:hover:not(:disabled) {
+  background-color: var(--color-modal-bg);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.spin-btn:active:not(:disabled) {
+  transform: translate(-50%, -50%) scale(0.95);
+}
+
+.spin-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.option-input {
+  flex: 1;
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  transition: border-color 0.3s;
+  width: 100%;
+  height: var(--control-height);
+  max-height: var(--control-height);
+}
+
+.option-input:focus {
+  outline: none;
+  border-color: var(--color-primary-border);
+}
+
+.option-input:active {
+  border-color: var(--color-primary-border);
+}
+
+.feedback-message {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  position: absolute;
+  left: 0;
+  bottom: -24px; /* show just below the controls, without reserving space */
+  width: 100%;
+  margin: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  pointer-events: none; /* avoid blocking clicks on nearby controls */
+}
+
+.feedback-message.show {
+  opacity: 1;
+}
+
+.feedback-message.error {
+  color: #c33;
+}
+
+.feedback-message.success {
+  background-color: #efe;
+  color: #3a3;
+  border: 1px solid #cfc;
+}
+
+.add-btn {
+  padding: 12px 30px;
+  font-size: 16px;
+  background-color: var(--color-primary);
+  color: white;
+  border: 1px solid var(--color-primary-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  white-space: nowrap;
+  height: var(--control-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-btn:hover {
+  background-color: var(--color-primary);
+}
+
+.add-btn:active {
+  background-color: var(--color-primary);
+}
+
+/* Options List */
+.options-list {
+  margin-top: 10px;
+  /* Fixed actions width; reduce Weight & Color to free space for Option */
+  --options-grid-cols: 72px 64px minmax(0, 1fr) 72px 64px;
+}
+
+.options-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.options-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.options-list h3 {
+  color: var(--color-text);
+  margin-bottom: 0;
+  margin-top: 0;
+}
+/* Column headings above list (table-like) */
+.options-columns-head {
+  display: grid;
+  grid-template-columns: var(--options-grid-cols);
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  color: var(--color-text);
+  font-weight: 600;
+  border-bottom: 1px solid var(--color-border);
+}
+.options-columns-head .col-actions { text-align: right; }
+/* Center the Wins column header to match count alignment */
+.options-columns-head .col-wins { justify-self: center; }
+
+.clear-all-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  background-color: var(--color-primary);
+  color: white;
+  border: 1px solid var(--color-primary-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  white-space: nowrap;
+
+  @media (min-width: 768px) {
+    font-size: 15px;
+  }
+}
+
+.clear-all-btn:hover {
+  background-color: var(--color-primary);
+}
+
+.clear-all-btn:active {
+  background-color: var(--color-primary);
+}
+
+.options-ol {
+  padding-left: 0;
+  margin: 0;
+}
+
+.options-ol li {
+  padding: 8px 0;
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+.option-item {
+  display: grid;
+  grid-template-columns: var(--options-grid-cols);
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+/* Ensure the wins count aligns with the header */
+.option-item .option-count {
+  justify-self: center;
+  margin-left: 0;
+}
+
+.option-text {
+  flex: 1;
+  min-width: 0; /* allow grid cell to shrink properly */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.option-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+/* Right-align action icons within the actions column */
+.option-item .option-buttons {
+  justify-self: end;
+}
+
+.edit-btn,
+.delete-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.edit-btn:hover {
+  transform: scale(1.2);
+  color: var(--color-primary);
+}
+
+.delete-btn:hover {
+  transform: scale(1.2);
+  color: var(--color-accent);
+}
+
+.option-input-edit {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 16px; /* prevent iOS zoom on focus */
+  border: 2px solid var(--color-accent);
+  border-radius: 3px;
+  font-family: inherit;
+  width: 100%;
+}
+
+.option-input-edit:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(238, 126, 141, 0.2);
+}
+
+/* Edit mode layout: make input span across grid, actions at the end */
+.option-item .option-input-edit {
+  grid-column: 1 / 4; /* span Weight, Color, Option; leave Wins and Actions visible */
+  min-width: 0; /* prevent overflow into actions column */
+}
+.option-item .edit-actions {
+  grid-column: 5; /* actions column */
+  justify-self: end;
+}
+
+.wheel-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--color-text);
+  font-size: 18px;
+  text-align: center;
+  padding: 20px;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.save-btn,
+.cancel-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.save-btn {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+.save-btn:hover {
+  background-color: #ee7e8d;
+}
+
+.cancel-btn {
+  background-color: #999;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #777;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .demo-container {
+    padding: 15px;
+    margin: 15px auto;
+  }
+
+  .demo-container h1 {
+    margin-bottom: 0;
+    font-size: 1.5rem;
+  }
+
+  .wheel-section {
+    margin-bottom: 15px;
+    min-height: auto;
+  }
+
+  .options-input-section {
+    flex-direction: column;
+
+    @media (max-width: 768px) {
+      flex-wrap: nowrap;
+    }
+  }
+
+  .add-btn {
+    width: 100%;
+  }
+  /* Ensure all form controls are >=16px to avoid iOS zoom */
+  .demo-container input,
+  .demo-container select,
+  .demo-container textarea,
+  .demo-container button {
+    font-size: 16px;
+  }
+  /* Mobile: reduce Weight & Color further; fixed actions width for alignment */
+  .options-list { --options-grid-cols: 64px 56px minmax(0, 1fr) 56px 64px; }
+}
+
+/* Wide screens: two-column layout (wheel left, controls right) */
+@media (min-width: 900px) {
+  .demo-container {
+    max-width: 1100px;
+  }
+  .picker-wheel-wrapper {
+    grid-template-columns: minmax(420px, 1fr) minmax(360px, 480px);
+    align-items: center;
+    column-gap: 0px;
+  }
+  .wheel-section {
+    margin-bottom: 0;
+    min-height: auto;
+  }
+}
+
+/* Result Modal */
+.result-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.result-modal.show {
+  display: flex;
+}
+
+.result-modal-content {
+  background-color: white;
+  padding: 40px 50px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease-out;
+  width: min(450px, 70vw);
+  max-width: 70vw;
+  position: relative;
+}
+
+.close-icon-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: #fff;
+  color: #666;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.close-icon-btn:hover {
+  background-color: var(--color-modal-bg);
+  color: #333;
+  border-color: #bbb;
+}
+
+.result-header-image {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  display: block;
+  margin: 0 auto 40px;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.result-modal-content h2 {
+  margin: 0 0 30px 0;
+  color: var(--color-text);
+  font-size: 32px;
+  text-align: center;
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+  background-color: var(--color-modal-bg);
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.result-text {
+  font-size: 36px;
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+  color: inherit;
+}
+
+.result-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.result-share {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.share-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-right: 4px;
+}
+
+.result-btn {
+  padding: 8px 20px;
+  font-size: 13px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.share-btn {
+  padding: 7px 14px;
+  font-size: 12px;
+  letter-spacing: 0.2px;
+}
+
+.share-icon-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.share-icon-btn svg,
+.share-icon-img {
+  display: block;
+  width: 32px;
+  height: 32px;
+}
+
+.result-share-mobile {
+  display: none;
+  margin-bottom: 16px;
+  justify-content: center;
+}
+
+.share-native-btn {
+  display: none;
+  background-color: var(--color-primary);
+}
+
+.share-native-btn:hover {
+  background-color: #2b9b93;
+}
+
+@media (max-width: 600px) {
+  .result-share {
+    display: none;
+  }
+
+  .share-native-btn {
+    display: inline-flex;
+  }
+
+  .result-footer {
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .result-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+.share-facebook {
+  background-color: #1877f2;
+}
+
+.share-facebook:hover {
+  background-color: #0f66d1;
+}
+
+.share-x {
+  background-color: #111111;
+}
+
+.share-x:hover {
+  background-color: #000000;
+}
+
+.share-instagram {
+  background-color: #e1306c;
+}
+
+.share-instagram:hover {
+  background-color: #c61e57;
+}
+
+.share-whatsapp {
+  background-color: #25d366;
+}
+
+.share-whatsapp:hover {
+  background-color: #1fb95a;
+}
+
+.download-btn {
+  background-color: var(--color-primary);
+}
+
+.download-btn:hover {
+  background-color: #2b9b93;
+}
+
+.close-btn {
+  background-color: #888;
+}
+
+.close-btn:hover {
+  background-color: #666;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: #999;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.2s, transform 0.15s;
+}
+
+.remove-btn:hover {
+  color: var(--color-accent);
+  transform: scale(1.2);
+}
+
+/* Option counts badge */
+.option-count {
+  display: inline-block;
+  min-width: 28px;
+  padding: 2px 6px;
+  margin-left: 8px;
+  border-radius: 10px;
+  background: var(--color-modal-bg);
+  color: var(--color-text);
+  font-size: 12px;
+}
+
+/* Weight selector (1x–5x) */
+.weight-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: #fff;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 14px;
+  padding: 6px 10px;
+  margin-right: 8px;
+  min-width: 32px;
+  height: 28px;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.weight-select:focus {
+  outline: none;
+  border-color: var(--color-primary-border);
+}
+
+@media (max-width: 600px) {
+  .weight-select {
+    font-size: 16px; /* avoids mobile zoom on tap */
+    height: 32px;
+    padding: 8px 12px;
+    min-width: 32px;
+  }
+}
+
+/* Confetti Animation */
+.confetti-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1001;
+}
+
+.confetti {
+  position: absolute;
+  top: -10px;
+  width: 10px;
+  height: 10px;
+  opacity: 0;
+  animation: confetti-fall linear forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 1;
+    top: -10px;
+    transform: translateX(0) rotateZ(0deg);
+  }
+  100% {
+    opacity: 0;
+    top: 100%;
+    transform: translateX(calc(var(--drift, 50px) - 100px)) rotateZ(720deg);
+  }
+}
+
+.confetti:nth-child(odd) {
+  --drift: 150px;
+}
+
+.confetti:nth-child(even) {
+  --drift: -50px;
+}
+
+.confetti:nth-child(3n) {
+  width: 8px;
+  height: 12px;
+}
+
+.confetti:nth-child(4n) {
+  width: 12px;
+  height: 8px;
+}
+
+/* Share notification animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+}
