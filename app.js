@@ -531,6 +531,25 @@ class PickerWheel {
 
     this.isSpinning = true;
 
+    // Prime audio for mobile - play and immediately pause to unlock autoplay
+    // This must happen during the user interaction window
+    if (this.fanfareAudio) {
+      try {
+        this.fanfareAudio.currentTime = 0;
+        const playPromise = this.fanfareAudio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            this.fanfareAudio.pause();
+            this.fanfareAudio.currentTime = 0;
+          }).catch(() => {
+            // Play failed, but we tried
+          });
+        }
+      } catch (e) {
+        // Ignore priming errors
+      }
+    }
+
     const wheelWrapper = this.wheelCanvas.querySelector('.wheel-wrapper');
 
     // Pause idle animation during spin
@@ -553,6 +572,16 @@ class PickerWheel {
 
     const duration = 14000; // 14s total spin (a bit longer)
     const start = performance.now();
+
+    // Schedule fanfare to play at the end (during user interaction window for mobile)
+    const fanfareDelay = duration - 200; // Slightly before animation ends
+    this.fanfareScheduled = false;
+    if (this.fanfareAudio) {
+      this.fanfareScheduled = true;
+      setTimeout(() => {
+        this.playFanfare();
+      }, fanfareDelay);
+    }
 
     // 16–22 full spins + random landing (faster overall)
     const spins = 16 + Math.random() * 6;
@@ -650,8 +679,12 @@ class PickerWheel {
     // Show the modal
     this.resultModal.classList.add('show');
     
-    // Play celebration effects
-    this.playFanfare();
+    // Play celebration effects (fanfare is scheduled during handleSpin for mobile compatibility)
+    // Only call fanfare here if it wasn't already scheduled
+    if (!this.fanfareScheduled) {
+      this.playFanfare();
+    }
+    this.fanfareScheduled = false; // Reset flag
     this.createConfetti();
 
     // Record spin and update counts UI
