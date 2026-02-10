@@ -59,12 +59,17 @@ A lightweight, dependency‑free picker wheel as a simple static page with separ
 
 ## Embedding
 
-Two simple options:
+Single-file handoff (recommended):
 
-- Drop [index.html](index.html), [style.css](style.css), and [app.js](app.js) into your project and open the HTML file.
-- Or embed via an `iframe` pointing to your hosted [index.html](index.html).
+- Deliver a single [index.html](index.html) that already contains all CSS and JS inline.
+- Drop that file into your project and open it directly, or host it and embed via an iframe.
 
-Initialization happens automatically on `DOMContentLoaded`.
+Multi-file development (this repo):
+
+- During development, the HTML, CSS, and JS are split across [index.html](index.html), [style.css](style.css), and [app.js](app.js).
+- At handoff, the CSS and JS will be inlined into the single [index.html](index.html).
+
+Initialization happens automatically on DOMContentLoaded.
 
 ## Layout
 
