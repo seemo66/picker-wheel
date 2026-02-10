@@ -76,6 +76,12 @@ class PickerWheel {
     this.renderOptions();
   }
 
+  /**
+   * Get the next available unique color from the palette
+   * Tries to use an unused palette color first, then generates a unique pastel color
+   * Uses golden angle (137.5°) for aesthetically pleasing color distribution
+   * @returns {String} A hex color code (e.g., '#3fb8af')
+   */
   getNextColor() {
     // Prefer an unused color from the fixed palette
     const currentOptions = Array.isArray(this.options) ? this.options : [];
@@ -107,10 +113,19 @@ class PickerWheel {
     return this.palette[0];
   }
 
+  /**
+   * Initialize Web Audio API context for generating click sounds
+   * Used for synthesizing click sounds during wheel rotation
+   */
   initAudio() {
     this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
   }
 
+  /**
+   * Preload fanfare audio to ensure compatibility with mobile browsers
+   * Mobile browsers require audio to be loaded during a user interaction
+   * This method sets up the audio for later playback
+   */
   initFanfareAudio() {
     // Preload fanfare audio to ensure it works on mobile browsers
     try {
@@ -124,6 +139,11 @@ class PickerWheel {
     }
   }
 
+  /**
+   * Generate and play a synthesized click sound using Web Audio API
+   * Creates a short burst of noise with a quick decay for realistic clicking
+   * Called each time the wheel passes over a new segment
+   */
   playClick() {
     if (!this.audioContext) {
       this.initAudio();
@@ -177,6 +197,11 @@ class PickerWheel {
   }
 
 
+  /**
+   * Create and animate confetti particles for celebration effect
+   * Generates 150 colorful particles with random positions, colors, shapes, and timing
+   * Particles fall and fade over 4-6 seconds before being automatically removed
+   */
   createConfetti() {
     const confettiContainer = document.createElement('div');
     confettiContainer.className = 'confetti-container';
@@ -207,6 +232,10 @@ class PickerWheel {
     }, 7000);
   }
 
+  /**
+   * Initialize DOM element references and set up initial state
+   * This method runs once during construction to cache element references
+   */
   initElements() {
     this.inputElement = document.getElementById('optionInput');
     this.addBtn = document.getElementById('addBtn');
@@ -232,8 +261,22 @@ class PickerWheel {
     this.isPointerDown = false;
     this.clearHistoryBtn = document.getElementById('clearHistoryBtn');
     this.spinCounts = {};
+    
+    // Accessibility: Store element that had focus before modal opens
+    this.focusedElementBeforeModal = null;
+    
+    // Set title attributes for button tooltips
+    this.addBtn.title = 'Add new option';
+    this.clearAllBtn.title = 'Clear all options';
+    this.clearHistoryBtn.title = 'Reset spin counts';
+    this.downloadPngBtn.title = 'Download winner as PNG';
+    this.shareNativeBtn.title = 'Share using device options';
   }
 
+  /**
+   * Attach all event listeners for user interactions
+   * Includes button clicks, keyboard shortcuts, and accessibility handlers
+   */
   attachEventListeners() {
     this.clearAllBtn.addEventListener('click', () => this.handleClearAll());
     this.addBtn.addEventListener('click', () => this.handleAddOption());
@@ -266,6 +309,20 @@ class PickerWheel {
       this.clearHistoryBtn.addEventListener('click', () => this.handleClearHistory());
     }
 
+    // Accessibility: Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.resultModal.classList.contains('show')) {
+        this.closeResultModal();
+      }
+    });
+
+    // Accessibility: Trap focus within modal when open
+    this.resultModal.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab' && this.resultModal.classList.contains('show')) {
+        this.trapFocus(e);
+      }
+    });
+
     // Keep idle rotation running even on hover/tap
     this.isHovering = false;
     this.isPointerDown = false;
@@ -278,6 +335,10 @@ class PickerWheel {
     });
   }
 
+  /**
+   * Handle adding a new option to the wheel
+   * Validates input and updates both storage and UI
+   */
   handleAddOption() {
     const value = this.inputElement.value.trim();
 
@@ -311,6 +372,9 @@ class PickerWheel {
     this.inputElement.value = '';
     this.inputElement.focus();
     this.renderOptions();
+    
+    // Accessibility: Announce to screen readers
+    this.announceToScreenReader(`Option "${value}" added. ${this.options.length} options total.`);
   }
 
   renderOptions() {
@@ -432,6 +496,12 @@ class PickerWheel {
     openMenus.forEach(m => m.classList.remove('open'));
   }
 
+  /**
+   * Render the visual wheel canvas with all current options
+   * Creates SVG segments with weighted angles, colors, and labels
+   * Handles both idle animation wrapper and spin animation wrapper
+   * Shows placeholder message if fewer than 2 options
+   */
   renderWheel() {
     this.wheelCanvas.innerHTML = '';
     
@@ -526,6 +596,12 @@ class PickerWheel {
     this.updateIdleAnimation();
   }
 
+  /**
+   * Handle the spin button click and animate the wheel rotation
+   * Implements complex easing curve, segment detection, and audio feedback
+   * Mobile-friendly: primes audio during user interaction to bypass autoplay restrictions
+   * Duration: 14 seconds with 16-22 full rotations
+   */
   handleSpin() {
     if (this.isSpinning) return;
 
@@ -658,6 +734,12 @@ class PickerWheel {
     return this.segments[this.segments.length - 1].index;
   }
 
+  /**
+   * Display the result modal with the winning option
+   * Includes accessibility features: focus management and screen reader announcement
+   * @param {Object} selectedOption - The winning option object with text and color
+   * @param {Number} selectedIndex - Index of the winning option in the options array
+   */
   displayResult(selectedOption, selectedIndex) {
     // Store the selected index for later use
     this.selectedIndex = selectedIndex;
@@ -676,8 +758,19 @@ class PickerWheel {
       this.resultHeaderImage.src = this.headerImage;
     }
     
+    // Accessibility: Store current focus to restore later
+    this.focusedElementBeforeModal = document.activeElement;
+    
     // Show the modal
     this.resultModal.classList.add('show');
+    
+    // Accessibility: Announce result to screen readers
+    this.announceToScreenReader(`Winner: ${selectedOption.text}`);
+    
+    // Accessibility: Move focus to modal close button
+    setTimeout(() => {
+      this.closeModalBtn.focus();
+    }, 100);
     
     // Play celebration effects (fanfare is scheduled during handleSpin for mobile compatibility)
     // Only call fanfare here if it wasn't already scheduled
@@ -691,18 +784,36 @@ class PickerWheel {
     this.recordSpin(selectedOption.text);
   }
 
+  /**
+   * Remove the currently selected option from the wheel
+   * Called from the result modal after a spin
+   */
   handleRemoveOption() {
     if (this.selectedIndex !== null) {
+      const removedOption = this.options[this.selectedIndex];
       this.options.splice(this.selectedIndex, 1);
       this.saveOptions();
       this.renderOptions();
+      
+      // Accessibility: Announce to screen readers
+      this.announceToScreenReader(`Option "${removedOption.text}" removed. ${this.options.length} options remaining.`);
     }
     this.closeResultModal();
   }
 
+  /**
+   * Close the result modal and restore focus to the element that was focused before
+   * Implements accessibility best practice of returning focus after modal dismissal
+   */
   closeResultModal() {
     this.resultModal.classList.remove('show');
     this.selectedIndex = null;
+    
+    // Accessibility: Restore focus to the element that was focused before modal opened
+    if (this.focusedElementBeforeModal && this.focusedElementBeforeModal.focus) {
+      this.focusedElementBeforeModal.focus();
+    }
+    this.focusedElementBeforeModal = null;
   }
 
   async createWinnerPngBlob() {
@@ -1142,10 +1253,17 @@ class PickerWheel {
     this.renderOptions();
   }
 
+  /**
+   * Clear all options from the wheel
+   * Resets the wheel to empty state
+   */
   handleClearAll() {
     this.options = [];
     this.saveOptions();
     this.renderOptions();
+    
+    // Accessibility: Announce to screen readers
+    this.announceToScreenReader('All options cleared.');
   }
 
   // Persist options in localStorage
@@ -1220,6 +1338,13 @@ class PickerWheel {
   }
 
   // Convert any CSS color string to normalized hex #rrggbb
+  /**
+   * Normalize any color format to lowercase hex (#rrggbb)
+   * Supports: hex (#rgb, #rrggbb), rgb(), rgba(), hsl(), hsla(), and CSS named colors
+   * Uses DOM to resolve named colors (e.g., 'red' -> '#ff0000')
+   * @param {String} color - Color in any CSS format
+   * @returns {String|null} Normalized hex color or null if invalid
+   */
   normalizeColor(color) {
     if (!color) return null;
     let c = color.toString().trim().toLowerCase();
@@ -1414,6 +1539,52 @@ class PickerWheel {
       return 0;
     } catch (e) {
       return 0;
+    }
+  }
+
+  /**
+   * Trap focus within the modal to support keyboard navigation
+   * Prevents Tab key from moving focus outside the modal dialog
+   * @param {KeyboardEvent} e - The keyboard event to handle
+   */
+  trapFocus(e) {
+    // Get all focusable elements within the modal
+    const focusableElements = this.resultModal.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const focusableArray = Array.from(focusableElements);
+    const firstElement = focusableArray[0];
+    const lastElement = focusableArray[focusableArray.length - 1];
+
+    if (e.shiftKey) {
+      // Shift+Tab: if on first element, move to last
+      if (document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement.focus();
+      }
+    } else {
+      // Tab: if on last element, move to first
+      if (document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
+      }
+    }
+  }
+
+  /**
+   * Announce a message to screen readers via aria-live region
+   * Uses polite announcement to avoid interrupting other content
+   * @param {String} message - The message to announce to screen readers
+   */
+  announceToScreenReader(message) {
+    const announcer = document.getElementById('announcer');
+    if (announcer) {
+      // Clear previous content
+      announcer.textContent = '';
+      // Use setTimeout to ensure screen reader picks up the change
+      setTimeout(() => {
+        announcer.textContent = message;
+      }, 100);
     }
   }
 }

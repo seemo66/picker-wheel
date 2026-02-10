@@ -7,8 +7,12 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="picker-wheel-demo">
-  <div class="demo-container">
+  <!-- Main content wrapper for screen readers -->
+  <main class="demo-container" role="main">
     <h1>Picker Wheel</h1>
+    
+    <!-- Accessibility: Live region for announcing results to screen readers -->
+    <div id="announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
     
     <div class="picker-wheel-wrapper">
       <!-- Wheel Section -->
@@ -17,7 +21,7 @@
       </div>
 
       <!-- Controls (inputs + list) -->
-      <div class="controls-section">
+      <div class="controls-section" role="region" aria-label="Wheel options">
         <!-- Options Input Section -->
         <div class="options-input-section">
           <input 
@@ -25,9 +29,10 @@
             id="optionInput" 
             placeholder="Enter an option..." 
             class="option-input"
+            title="Type an option name"
           >
           <div id="feedbackMessage" class="feedback-message"></div>
-          <button id="addBtn" class="add-btn">Add</button>
+          <button id="addBtn" class="add-btn" title="Add new option">Add</button>
         </div>
 
         <!-- Options List -->
@@ -35,25 +40,25 @@
           <div class="options-list-header">
             <h3>Options</h3>
             <div class="options-actions">
-              <button id="clearHistoryBtn" class="clear-all-btn">Reset Wins</button>
-              <button id="clearAllBtn" class="clear-all-btn">Clear Options</button>
+              <button id="clearHistoryBtn" class="clear-all-btn" title="Reset spin counts">Reset Wins</button>
+              <button id="clearAllBtn" class="clear-all-btn" title="Clear all options">Clear Options</button>
             </div>
           </div>
           <!-- Column headings (table-like) -->
-          <div class="options-columns-head" aria-hidden="false">
-            <span class="col-weight">Weight</span>
-            <span class="col-color">Color</span>
-            <span class="col-option">Option</span>
-            <span class="col-wins">Wins</span>
-            <span class="col-actions"><span class="sr-only">Actions</span></span>
+          <div class="options-columns-head" role="row" aria-label="Column headers">
+            <span class="col-weight" role="columnheader">Weight</span>
+            <span class="col-color" role="columnheader">Color</span>
+            <span class="col-option" role="columnheader">Option</span>
+            <span class="col-wins" role="columnheader">Wins</span>
+            <span class="col-actions" role="columnheader"><span class="sr-only">Actions</span></span>
           </div>
-          <ol id="optionsList" class="options-ol"></ol>
+          <ol id="optionsList" class="options-ol" role="list"></ol>
         </div>
       </div>
     </div>
 
-    <!-- Result Modal -->
-    <div id="resultModal" class="result-modal">
+    <!-- Result Modal with proper ARIA attributes for accessibility -->
+    <div id="resultModal" class="result-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="result-modal-content">
         <button id="closeModalBtn" class="close-icon-btn" aria-label="Close">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
@@ -61,7 +66,7 @@
           </svg>
         </button>
         <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 799 166' fill-rule='nonzero' stroke-linejoin='round' stroke-miterlimit='2' xmlns:v='https://vecta.io/nano'%3E%3Cpath d='M263.5 127.9l-3.3 3.1c-2.4-2.4-5-4.1-7.9-5.4-2.8-1.2-5.6-1.8-8.3-1.8-3.4 0-6.6.8-9.6 2.5s-5.4 3.9-7.1 6.7a16.99 16.99 0 0 0-2.5 9c0 3.2.9 6.3 2.6 9.2s4.1 5.2 7.2 6.9 6.4 2.5 10 2.5c4.4 0 8.1-1.2 11.2-3.7s4.9-5.7 5.4-9.7h-13.7v-4.1H266c0 6.6-2 11.9-5.9 15.8s-9.1 5.8-15.6 5.8c-7.9 0-14.2-2.7-18.8-8.1-3.6-4.2-5.3-9-5.3-14.4 0-4.1 1-7.8 3.1-11.3 2-3.5 4.8-6.2 8.4-8.2s7.6-3 12.1-3c3.6 0 7.1.7 10.3 2 3.1 1.2 6.2 3.3 9.2 6.2zm16.1-7.2h4.3v42.9h-4.3zm20.1 0h21.5v4.2H304v13.4h17.2v4.2H304v21.1h-4.3v-42.9zm30.7 4.2v-4.2h23.5v4.2h-9.6v38.7h-4.4v-38.7h-9.5zm31.2 30.7l3.6-2.2c2.6 4.7 5.5 7.1 8.9 7.1 1.4 0 2.8-.3 4.1-1a7.58 7.58 0 0 0 2.9-2.7c.7-1.1 1-2.3 1-3.6 0-1.4-.5-2.8-1.5-4.2-1.3-1.9-3.8-4.2-7.3-6.9-3.6-2.7-5.8-4.7-6.7-5.9-1.5-2-2.3-4.2-2.3-6.6 0-1.9.4-3.6 1.3-5.1s2.2-2.7 3.8-3.6 3.4-1.3 5.3-1.3c2 0 3.9.5 5.7 1.5s3.6 2.8 5.6 5.5l-3.5 2.7c-1.6-2.1-3-3.5-4.1-4.2s-2.4-1-3.7-1c-1.7 0-3.1.5-4.2 1.6-1.1 1-1.6 2.3-1.6 3.9 0 .9.2 1.8.6 2.7s1.1 1.8 2.1 2.9c.6.5 2.4 2 5.5 4.3 3.7 2.7 6.3 5.2 7.6 7.3 1.4 2.1 2.1 4.3 2.1 6.4 0 3.1-1.2 5.8-3.5 8.1s-5.2 3.4-8.6 3.4c-2.6 0-5-.7-7.1-2.1s-4.2-3.8-6-7zm60.7 8l6.1-42.9h.7l17.4 35.2 17.3-35.2h.7l6.2 42.9h-4.2l-4.2-30.7-15.2 30.7H446l-15.3-30.9-4.2 30.9h-4.2zm80.3-42.9l20 42.9H518l-6.7-14.1h-18.5l-6.7 14.1h-4.8l20.3-42.9h1zm-.5 9.1l-7.4 15.5h14.7l-7.3-15.5zm33.2 33.8v-42.9h8.9c6.4 0 11.1.5 14 1.5 4.2 1.5 7.4 4 9.8 7.6 2.3 3.6 3.5 7.9 3.5 12.9 0 4.3-.9 8.1-2.8 11.3-1.9 3.3-4.3 5.7-7.2 7.2-3 1.6-7.1 2.3-12.5 2.3h-13.7v.1zm4.1-4.1h5c5.9 0 10-.4 12.3-1.1 3.2-1 5.8-2.9 7.6-5.7s2.8-6.1 2.8-10c0-4.1-1-7.7-3-10.6s-4.8-4.9-8.4-6c-2.7-.8-7.1-1.2-13.3-1.2h-3v34.6zm46.3-38.8h24.6v4.2H590v13.4h20.1v4.2H590v16.9h20.1v4.2h-24.4v-42.9zm60.5 0h24.6v4.2h-20.3v13.4h20.1v4.2h-20.1v16.9h20.1v4.2h-24.4v-42.9zm55.5 0l20 42.9h-4.6l-6.7-14.1h-18.5l-6.7 14.1h-4.8l20.3-42.9h1zm-.6 9.1l-7.4 15.5h14.7l-7.3-15.5zm28.8 25.8l3.6-2.2c2.6 4.7 5.5 7.1 8.9 7.1 1.4 0 2.8-.3 4.1-1a7.58 7.58 0 0 0 2.9-2.7c.7-1.1 1-2.3 1-3.6 0-1.4-.5-2.8-1.5-4.2-1.3-1.9-3.8-4.2-7.3-6.9-3.6-2.7-5.8-4.7-6.7-5.9-1.5-2-2.3-4.2-2.3-6.6 0-1.9.4-3.6 1.3-5.1s2.2-2.7 3.8-3.6 3.4-1.3 5.3-1.3c2 0 3.9.5 5.7 1.5s3.6 2.8 5.6 5.5l-3.5 2.7c-1.6-2.1-3-3.5-4.1-4.2s-2.4-1-3.7-1c-1.7 0-3.1.5-4.2 1.6-1.1 1-1.6 2.3-1.6 3.9 0 .9.2 1.8.6 2.7s1.1 1.8 2.1 2.9c.6.5 2.4 2 5.5 4.3 3.7 2.7 6.3 5.2 7.6 7.3 1.4 2.1 2.1 4.3 2.1 6.4 0 3.1-1.2 5.8-3.5 8.1-2.4 2.3-5.2 3.4-8.6 3.4-2.6 0-5-.7-7.1-2.1-2.3-1.4-4.2-3.8-6-7zm36.8-34.9h4.9l11 17.7 10.8-17.7h5l-13.6 22.4v20.5h-4.2v-20.5l-13.9-22.4z'/%3E%3Cg fill='%233fb8af'%3E%3Cpath d='M133.9 61.1C121.7 71.2 105 77 90.1 83.1v6.4c0 30.2-8.4 43.6-21.6 43.6-10.5 0-17-7.4-17-17.7 0-18.9 15.1-28 33.3-35.8V59.4c0-20.1 2.9-32.3 7.4-38.1-20.2-2.9-37.4-16-56.7-16-21.9 0-30.1 11.4-30.1 27.6 0 11.1 6.4 19.2 16 19.2 6.3 0 11.6-5.5 11.6-10.4 0-1.7.6-2.8 2.8-2.8 1.8 0 2.6 1.7 2.6 2.8 0 7.4-6.5 15.6-17 15.6C8.7 57.3 0 47.1 0 32.9 0 13.7 10.6 0 35.4 0c23.2 0 40.7 16.5 64.4 16.5 1.9 0 3.6.6 3.6 2.7 0 1.9-1.5 2.7-2.9 2.7-6 0-10.4 10.1-10.4 37.2v18.3C105.8 71 122.9 65 133.9 54c.4-20.1 2.4-37 10.9-37 5.4 0 6 5 6 7.9 0 13.4-4.6 23.3-11.5 31v5c0 48.5 3.8 98.7 42.7 98.7v.1c16.4 0 25-9.3 25-22.5 0-10.4-6.4-17.9-16-17.9-6.5 0-11.6 5.5-11.6 10.4 0 1.7-.6 2.8-2.8 2.8-1.8 0-2.6-1.7-2.6-2.8 0-7.4 6.5-15.6 17-15.6 12.7 0 21.4 9.7 21.4 23.2 0 16.1-10.4 27.8-30.3 27.8-44.3-.1-48.2-53.4-48.2-104zM84.8 89.4v-4.1c-15.7 6.9-27.9 15-27.9 30.2 0 7.2 4.5 12.4 11.6 12.4 10.3 0 16.3-12.1 16.3-38.5zM139.6 47c3.8-5.9 6.1-13.1 6.1-22 0-.9-.4-2.6-1.2-2.6-2.5 0-4.2 10.8-4.9 24.6zm56 38.1c.6.1 1.4.1 2 .1 8.3 0 12.8-1.9 18-9.7.9-1.3 1.8-2.7 3.1-2.7s2.6.8 2.6 1.9c0 .9-.9 2.9-1.9 4.5-5.4 7.9-12 11.1-21.8 11.1-.8 0-1.5 0-2.3-.1-1.4 9.9-8.2 18.6-18.8 18.6-10.5 0-17.9-6.5-17.9-21 0-11.4 8.3-23.4 19.6-23.4s17.1 8.4 17.4 20.7zm-5.2 4c-7-2.4-13.6-8.2-13.6-15.9 0-1.4.1-2.7.6-3.7-7.6.6-13.7 9.9-13.7 18.3 0 10.9 5.4 15.9 12.8 15.9 8.5 0 13-6.9 13.9-14.6zm-6.7-18.3c-1 .3-1.8 1-1.8 2.4 0 4.9 3.8 8.6 8.4 10.5-.4-6-2.6-10.7-6.6-12.9z'/%3E%3Cpath d='M217.4 80.3c-1.3 0-2.6-.9-2.6-2.4 0-.9.9-2.3.9-2.3 6.7-10.9 7.7-14.5 13.2-14.5 6.7 0 9 5.6 11.3 29.8 3.7-11.8 9.7-26.5 17.5-26.5 8.3 0 13.9 16.6 17 28.7 4.7-13.8 15.4-28.7 27-28.7 9.7 0 10.8 9.9 11.6 20.6.8 9.5 1.7 18.7 13.1 18.7 16.9 0 30.5-16.5 37.8-28.2 0 0 .8-1.4 2.3-1.4 1.4 0 2.4.9 2.4 2 0 1.3-1 3.1-1 3.1-8.1 12.4-22.8 29.6-41.5 29.6-15.2 0-17.3-12.2-18.2-23-.8-8.6-.9-16.3-6.7-16.3-11.9 0-23.2 22.8-24.2 36.7-.1 1.3-1.3 2.4-2.6 2.4a2.65 2.65 0 0 1-2.6-2.6c0-1.8-6.1-36.6-14.6-36.6-8.7 0-16.1 37.1-16.1 37.1-.4 1.2-1.3 2-2.6 2-1.4 0-2.6-1.2-2.6-2.4 0-35.1-5.1-40.1-7.6-40.1-3.2 0-5 6.5-9.5 13.1.1.5-.6 1.2-1.7 1.2z'/%3E%3Cpath d='M390.9 73.4c0 11.3-20.1 15.5-24.4 16.3.5 9.7 5.6 14.1 12.7 14.1 17 0 30.5-16.5 37.8-28.2 0 0 .8-1.4 2.3-1.4 1.4 0 2.4.9 2.4 2 0 1.3-1 3.1-1 3.1-8.1 12.4-22.8 29.6-41.5 29.6-10.5 0-17.9-6.5-17.9-21 0-11.4 8.3-23.4 19.6-23.4 6.3-.1 10 3.5 10 8.9zm-24.3 11.3c6.1-1.2 19.2-4.4 19.2-11.4 0-2.3-1.9-3.8-5-3.8-7 0-12.9 7.4-14.2 15.2z'/%3E%3Cpath d='M418.5 80.3c-1.3 0-2.6-.9-2.6-2.4 0-.9.9-2.3.9-2.3 6.7-10.9 7.7-14.5 13.2-14.5 6.7 0 9 5.6 11.3 29.8 3.7-11.8 9.7-26.5 17.5-26.5 8.3 0 13.9 16.6 17 28.7 4.7-13.8 15.4-28.7 27-28.7 9.7 0 10.8 9.9 11.6 20.6.8 9.5 1.7 18.7 13.1 18.7 16.9 0 30.5-16.5 37.8-28.2 0 0 .8-1.4 2.3-1.4 1.4 0 2.4.9 2.4 2 0 1.3-1 3.1-1 3.1-8.1 12.4-22.8 29.6-41.5 29.6-15.2 0-17.3-12.2-18.2-23-.8-8.6-.9-16.3-6.7-16.3-11.9 0-23.2 22.8-24.2 36.7-.1 1.3-1.3 2.4-2.6 2.4a2.65 2.65 0 0 1-2.6-2.6c0-1.8-6.1-36.6-14.6-36.6-8.7 0-16.1 37.1-16.1 37.1-.4 1.2-1.3 2-2.6 2-1.4 0-2.6-1.2-2.6-2.4 0-35.1-5.1-40.1-7.5-40.1-3.2 0-5 6.5-9.5 13.1-.1.5-.7 1.2-1.8 1.2z'/%3E%3Cpath d='M598.9 81.5c1.5 11.5 5.9 22.1 16.6 22.1 17 0 30.5-16.5 37.8-28.2 0 0 1-1.4 2.3-1.4 1.4 0 2.4.9 2.4 2 0 1.3-1 3.1-1 3.1-8.1 12.4-22.8 29.6-41.5 29.6-9.3 0-14.8-5.4-18.2-12.9-2.7 7.3-8.7 12.9-17.3 12.9-10.5 0-17.9-6.1-17.9-19.7 0-12 6.8-24.6 19.6-24.6 10.2.1 15.8 6.9 17.2 17.1zm-17.1-11.9c-9.3 0-14.5 10-14.5 19.5 0 10 5.4 14.6 12.8 14.6 9.5 0 13.9-8.7 13.9-17.4 0-9.9-3.9-16.7-12.2-16.7z'/%3E%3Cpath d='M743.6 74.1c1.4 0 2.4.9 2.4 2 0 1.3-1 3.1-1 3.1-8.1 12.4-22.8 29.6-41.5 29.6-8.6 0-13.4-5.8-16.4-13.7-5.2 8.4-11.6 13.7-19.1 13.7-10.5 0-17.9-6.1-17.9-19.7 0-12 6.8-24.7 19.6-24.7 5.8 0 10.2 1.7 13.6 4.6v-3.5c0-27.4 5.8-58 14.8-58 4.7 0 6.8 4.4 6.8 12.4 0 21.8-5.1 50.3-14.3 69 1.9 8.3 5.8 14.7 12.9 14.7 17 0 30.5-16.5 37.8-28.2 0 .1 1.1-1.3 2.3-1.3zm-75.5 29.6c6.4 0 12.2-6.4 17-16.1-.4-2-.8-4.1-1-6.3-1.4-7.2-6-11.8-14.3-11.8-9.3 0-14.5 10.1-14.5 19.6 0 10 5.3 14.6 12.8 14.6zm20.4-38.2c0 4 0 8.6.5 13.2 6.8-18 10.9-42 10.9-58.7 0-4.5-.3-7.3-1.5-7.3-4.7 0-9.9 29.8-9.9 52.8z'/%3E%3Cpath d='M768.1 73.4c0 11.3-20.1 15.5-24.4 16.3.5 9.7 5.6 14.1 12.7 14.1 17 0 30.5-16.5 37.8-28.2 0 0 .8-1.4 2.3-1.4 1.4 0 2.4.9 2.4 2 0 1.3-1 3.1-1 3.1-8.1 12.4-22.8 29.6-41.5 29.6-10.5 0-17.9-6.5-17.9-21 0-11.4 8.3-23.4 19.6-23.4 6.3-.1 10 3.5 10 8.9zm-24.3 11.3c6.1-1.2 19.2-4.4 19.2-11.4 0-2.3-1.9-3.8-5-3.8-7.1 0-12.9 7.4-14.2 15.2z'/%3E%3C/g%3E%3C/svg%3E" alt="Gifts Made Easy" class="result-header-image">
-        <h2>🎉 Winner! 🎉</h2>
+        <h2 id="modalTitle">🎉 Winner! 🎉</h2>
         <div class="result-row">
           <p id="resultText" class="result-text"></p>
           <button id="removeOptionBtn" class="result-btn remove-btn" title="Remove"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg></button>
@@ -69,35 +74,35 @@
         <div class="result-footer">
           <div class="result-share">
             <span class="share-label">Share</span>
-            <button id="shareFacebookBtn" class="share-icon-btn" aria-label="Share on Facebook">
+            <button id="shareFacebookBtn" class="share-icon-btn" aria-label="Share on Facebook" title="Share on Facebook">
               <svg viewBox="0 0 64 64" width="32" height="32" aria-hidden="true">
                 <circle cx="32" cy="32" r="31" fill="#3b5998"></circle>
                 <path d="M34.1,47V33.3h4.6l0.7-5.3h-5.3v-3.4c0-1.5,0.4-2.6,2.6-2.6l2.8,0v-4.8c-0.5-0.1-2.2-0.2-4.1-0.2 c-4.1,0-6.9,2.5-6.9,7V28H24v5.3h4.6V47H34.1z" fill="white"></path>
               </svg>
             </button>
-            <button id="shareXBtn" class="share-icon-btn" aria-label="Share on X">
+            <button id="shareXBtn" class="share-icon-btn" aria-label="Share on X" title="Share on X">
               <img height="32" width="32" alt="X Icon" draggable="false" src="data:image/png;base64,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" class="share-icon-img">
             </button>
-            <button id="shareInstagramBtn" class="share-icon-btn" aria-label="Share on Instagram">
+            <button id="shareInstagramBtn" class="share-icon-btn" aria-label="Share on Instagram" title="Share on Instagram (downloads image)">
               <svg viewBox="0 0 64 64" width="32" height="32" aria-hidden="true">
                 <circle cx="32" cy="32" r="31" fill="#e1306c"></circle>
                 <path d="M41.7 19.1c-1.7-.8-3.7-1.2-6.1-1.2H28.4c-2.4 0-4.4.4-6.1 1.2-1.6.8-3 2.1-3.8 3.8-.8 1.7-1.2 3.7-1.2 6.1v6.1c0 2.4.4 4.4 1.2 6.1.8 1.6 2.1 3 3.8 3.8 1.7.8 3.7 1.2 6.1 1.2h7.2c2.4 0 4.4-.4 6.1-1.2 1.6-.8 3-2.1 3.8-3.8.8-1.7 1.2-3.7 1.2-6.1v-6.1c0-2.4-.4-4.4-1.2-6.1-.8-1.6-2.1-3-3.8-3.8zM32 41.1c-5 0-9.1-4.1-9.1-9.1s4.1-9.1 9.1-9.1 9.1 4.1 9.1 9.1-4.1 9.1-9.1 9.1zm9.6-16.6c-1.2 0-2.1-1-2.1-2.1s1-2.1 2.1-2.1 2.1 1 2.1 2.1-1 2.1-2.1 2.1z" fill="white"></path>
                 <circle cx="32" cy="32" r="5.4" fill="white"></circle>
               </svg>
             </button>
-            <button id="shareWhatsappBtn" class="share-icon-btn" aria-label="Share on WhatsApp">
+            <button id="shareWhatsappBtn" class="share-icon-btn" aria-label="Share on WhatsApp" title="Share on WhatsApp">
               <svg viewBox="0 0 64 64" width="32" height="32" aria-hidden="true">
                 <circle cx="32" cy="32" r="31" fill="#25D366"></circle>
                 <path d="m42.32286,33.93287c-0.5178,-0.2589 -3.04726,-1.49644 -3.52105,-1.66732c-0.4712,-0.17346 -0.81554,-0.2589 -1.15987,0.2589c-0.34175,0.51004 -1.33075,1.66474 -1.63108,2.00648c-0.30032,0.33658 -0.60064,0.36247 -1.11327,0.12945c-0.5178,-0.2589 -2.17994,-0.80259 -4.14759,-2.56312c-1.53269,-1.37217 -2.56312,-3.05503 -2.86603,-3.57283c-0.30033,-0.5178 -0.03366,-0.80259 0.22524,-1.06149c0.23301,-0.23301 0.5178,-0.59547 0.7767,-0.90616c0.25372,-0.31068 0.33657,-0.5178 0.51262,-0.85437c0.17088,-0.36246 0.08544,-0.64725 -0.04402,-0.90615c-0.12945,-0.2589 -1.15987,-2.79613 -1.58964,-3.80584c-0.41424,-1.00971 -0.84142,-0.88027 -1.15987,-0.88027c-0.29773,-0.02588 -0.64208,-0.02588 -0.98382,-0.02588c-0.34693,0 -0.90616,0.12945 -1.37736,0.62136c-0.4712,0.5178 -1.80194,1.76053 -1.80194,4.27186c0,2.51134 1.84596,4.945 2.10227,5.30747c0.2589,0.33657 3.63497,5.51458 8.80262,7.74113c1.23237,0.5178 2.1903,0.82848 2.94111,1.08738c1.23237,0.38836 2.35599,0.33657 3.24402,0.20712c0.99159,-0.15534 3.04985,-1.24272 3.47963,-2.45956c0.44013,-1.21683 0.44013,-2.22654 0.31068,-2.45955c-0.12945,-0.23301 -0.46601,-0.36247 -0.98382,-0.59548" fill="white"></path>
               </svg>
             </button>
           </div>
-          <button id="shareNativeBtn" class="result-btn share-native-btn">Share</button>
-          <button id="downloadPngBtn" class="result-btn download-btn">Download PNG</button>
+          <button id="shareNativeBtn" class="result-btn share-native-btn" title="Share using device options">Share</button>
+          <button id="downloadPngBtn" class="result-btn download-btn" title="Download winner as PNG">Download PNG</button>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <script src="app.js"></script>
   
