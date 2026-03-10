@@ -1,6 +1,6 @@
 # Picker Wheel
 
-A lightweight, dependency‑free picker wheel as a simple static page with separate files: [index.html](index.html), [style.css](style.css), and [app.js](app.js). Open locally or embed in your site.
+A lightweight, dependency‑free picker wheel delivered as a single self-contained [index.html](index.html) file (CSS and JS are inlined). Open locally or drop onto any page as a widget.
 
 ## Features
 
@@ -55,32 +55,27 @@ A lightweight, dependency‑free picker wheel as a simple static page with separ
 - Open [index.html](index.html) directly in your browser.
 - Type options and click “Add” (need at least 2).
 - Click “SPIN” to randomly select an option.
-- The winner appears in a modal; choose "Download PNG" to save as an image, "Remove" to delete, or "Close" to keep it.
+- The winner appears in a modal; choose "Download Image" to save as a PNG, "Remove" to delete, or "Close" to keep it.
 
 ## Embedding
 
-Single-file handoff (recommended):
+All CSS and JS are inlined directly in [index.html](index.html) — no external dependencies.
 
-- Deliver a single [index.html](index.html) that already contains all CSS and JS inline.
-- Drop that file into your project and open it directly, or host it and embed via an iframe.
+- Drop [index.html](index.html) into your project and open it directly, or host it and embed via an `<iframe>`.
+- To place it as a widget on an existing page, copy the contents of the `<style>` and `<script>` blocks and the widget's HTML markup into your page.
 
-Multi-file development (this repo):
-
-- During development, the HTML, CSS, and JS are split across [index.html](index.html), [style.css](style.css), and [app.js](app.js).
-- At handoff, the CSS and JS will be inlined into the single [index.html](index.html).
-
-Initialization happens automatically on DOMContentLoaded.
+Initialization happens automatically on `DOMContentLoaded`.
 
 ## Layout
 
 - Desktop/tablet (wide screens): Wheel on the left, inputs and options list in a right-hand column.
 - Mobile (narrow screens): Inputs and options list stack under the wheel.
- 
-This is handled purely with CSS grid and media queries in [style.css](style.css). Adjust the breakpoint or column widths in the `@media (min-width: 900px)` section if you want a different threshold or proportions.
+
+This is handled purely with CSS grid and media queries in the `<style>` block of [index.html](index.html). Adjust the breakpoint or column widths in the `@media (min-width: 900px)` section if you want a different threshold or proportions.
 
 ## Theming (CSS Variables)
 
-Update variables on the `.demo-container` selector in [style.css](style.css) to match your brand. Scoping to the widget container prevents collisions with site-wide variables:
+Update variables on the `.demo-container` selector in the `<style>` block of [index.html](index.html) to match your brand. Scoping to the widget container prevents collisions with site-wide variables:
 
 - `--font-base`: Base text font stack
 - `--font-heading`: Heading font stack
@@ -93,7 +88,7 @@ Update variables on the `.demo-container` selector in [style.css](style.css) to 
 
 ### Idle Animation Speed
 
-The idle rotation uses a CSS animation applied to an outer wrapper. Adjust speed via the `--idle-duration` variable (default `30s`). Set it on `.demo-container` in [style.css](style.css) or via `window.PickerWheelTheme`:
+The idle rotation uses a CSS animation applied to an outer wrapper. Adjust speed via the `--idle-duration` variable (default `30s`). Set it on `.demo-container` in the `<style>` block of [index.html](index.html) or via `window.PickerWheelTheme`:
 
 ```css
 .demo-container {
@@ -110,7 +105,7 @@ Behavior notes:
 
 ## Runtime Palette, Theme & Share URL Override (JS)
 
-You can override the slice palette, CSS variables, and share URL at runtime by inserting a small `<script>` above the app script in [index.html](index.html):
+You can override the slice palette, CSS variables, and share URL at runtime by inserting a small `<script>` above the main `<script>` block in [index.html](index.html):
 
 ```html
 <script>
@@ -158,10 +153,55 @@ The `headerImage` option allows you to customize the image displayed at the top 
 - Spin counts per option are stored in `localStorage` under `pickerWheelSpinCounts` and displayed inline next to each option. Use “Clear Counts” (next to “Clear Options”) to reset counts without affecting current options.
  - Custom per-option colors are saved as normalized hex values within `pickerWheelOptions` and applied to wheel slices on render.
 
+## Social Sharing
+
+The result modal provides per-platform sharing buttons. Behaviour differs between desktop and mobile browsers, and between platforms, due to browser and app API limitations.
+
+### Facebook (Desktop & Mobile)
+
+- **Desktop:** Clicking the Facebook icon opens the Facebook Share dialog with the current page URL. Users write their own post message. The preview (title, description, image) comes from the host page's Open Graph metadata.
+- **Mobile:** Clicking the icon opens the device's native share sheet. Users can share the link, but the widget cannot attach the winner image — users must add images manually.
+- **Limitations:** Cannot prefill text; preview content is controlled by the host page's metadata.
+
+### X / Twitter (Desktop & Mobile)
+
+Clicking the X icon opens the X share dialog with a pre-populated message that includes the actual winner.
+
+Example (if "Pizza" is the winner):
+> *I just spun a Picker Wheel and the winner was 'Pizza'! Create your own wheel here: https://seemo66.github.io/picker-wheel/*
+
+Users can edit the message before posting.
+
+### Instagram (Mobile only)
+
+- Clicking the Instagram icon uses the device's native share sheet.
+- The winner image is preloaded for sharing to Instagram Stories or Feed.
+- Users must edit captions or text manually.
+- Only works on mobile devices with the Instagram app installed.
+- Desktop Instagram does not support sharing images directly from the widget.
+
+### WhatsApp (Desktop & Mobile)
+
+Clicking the WhatsApp icon opens a WhatsApp share dialog (or the app on mobile) with a pre-populated message including the winner.
+
+Example (if "Pizza" is the winner):
+> *I just spun a Picker Wheel and got 'Pizza'! Let's create your own wheel here: https://seemo66.github.io/picker-wheel/*
+
+Users can edit the message before sending.
+
+### Limitations Summary
+
+| Platform | Prefill text | Attach winner image | Desktop | Mobile |
+|---|---|---|---|---|
+| Facebook | ✗ | ✗ | Share URL with OG preview | Link via native share |
+| X / Twitter | ✓ (winner included) | ✗ | ✓ | ✓ |
+| Instagram | ✗ | ✓ (mobile only) | ✗ | ✓ (native share) |
+| WhatsApp | ✓ (winner included) | ✗ | ✓ | ✓ |
+
 ## Development Notes
 
-- Core logic is implemented in the `PickerWheel` class in [app.js](app.js).
-- Styling uses CSS variables defined on the `.demo-container` selector in [style.css](style.css).
+- Core logic is implemented in the `PickerWheel` class in the `<script>` block of [index.html](index.html).
+- Styling uses CSS variables defined on the `.demo-container` selector in the `<style>` block of [index.html](index.html).
 - The wheel is rendered with inline SVG for slices, labels, and the indicator arrow.
 
 ## Troubleshooting
