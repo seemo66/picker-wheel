@@ -48,7 +48,7 @@ html, body {
 
 .picker-wheel-demo {
   width: 100%;
-  min-height: 100vh;
+  min-height: 850px;
   overflow-x: hidden;
 }
 
@@ -1233,9 +1233,23 @@ input[title]:hover::before {
 /*
   Picker Wheel JS
   Customization:
+  All options below are set via window.PickerWheelConfig = { ... } placed BEFORE this script.
+
+  - palette: Array of hex colors for wheel slices. e.g. { palette: ['#ff0000', '#00ff00'] }
+  - headerImage: URL or data-URI for the result modal logo image. e.g. { headerImage: 'https://...' }
+  - shareUrl: The URL used when sharing results on social media. Defaults to window.location.
+              When embedded in a WordPress iframe, set this to the WordPress page URL so shares
+              link to the page, not the iframe source.
+              e.g. { shareUrl: 'https://yoursite.com/my-page' }
+  - fanfareUrl: URL of the audio file to play when a winner is selected.
+               Defaults to a bundled MP3. If that URL is blocked by a Content Security Policy
+               (common on managed WordPress hosts), upload your own MP3 and set this option.
+               e.g. { fanfareUrl: 'https://yoursite.com/wp-content/uploads/fanfare.mp3' }
+               Set to '' (empty string) to disable the fanfare sound entirely.
+
+  CSS variable overrides:
   - Override CSS variables via window.PickerWheelTheme, e.g. { '--color-primary': '#6c5ce7' }.
-  - Override the slice palette via window.PickerWheelConfig = { palette: ['#..', ...] }.
-  - Override the result modal header image via window.PickerWheelConfig = { headerImage: 'url-or-data-uri' }.
+
   Place overrides before this script runs (above this block).
 */
 
@@ -1286,6 +1300,11 @@ class PickerWheel {
     this.shareUrl = window.location.origin + (window.location.pathname || '');
     if (cfg && cfg.shareUrl) {
       this.shareUrl = cfg.shareUrl;
+    }
+    // Default fanfare URL; allow override or disable via config
+    this.fanfareUrl = 'https://orangefreesounds.com/wp-content/uploads/2025/11/Winning-fanfare-sound-effect.mp3';
+    if (cfg && typeof cfg.fanfareUrl === 'string') {
+      this.fanfareUrl = cfg.fanfareUrl;
     }
     // Initialize defaults using next available unique colors
     ['Yes','Yes','Yes','No','No','No'].forEach(text => {
@@ -1360,8 +1379,10 @@ class PickerWheel {
    */
   initFanfareAudio() {
     // Preload fanfare audio to ensure it works on mobile browsers
+    // fanfareUrl can be overridden or disabled via window.PickerWheelConfig.fanfareUrl
+    if (!this.fanfareUrl) return;
     try {
-      this.fanfareAudio = new Audio('https://orangefreesounds.com/wp-content/uploads/2025/11/Winning-fanfare-sound-effect.mp3');
+      this.fanfareAudio = new Audio(this.fanfareUrl);
       this.fanfareAudio.volume = 0.7;
       this.fanfareAudio.preload = 'auto';
       // Load the audio file
@@ -1418,9 +1439,11 @@ class PickerWheel {
         this.fanfareAudio.play().catch(err => {
           console.log('Audio play failed:', err);
           // Fallback: try creating new instance in case of error
-          const audio = new Audio('https://orangefreesounds.com/wp-content/uploads/2025/11/Winning-fanfare-sound-effect.mp3');
-          audio.volume = 0.7;
-          audio.play().catch(err2 => console.log('Fallback audio also failed:', err2));
+          if (this.fanfareUrl) {
+            const audio = new Audio(this.fanfareUrl);
+            audio.volume = 0.7;
+            audio.play().catch(err2 => console.log('Fallback audio also failed:', err2));
+          }
         });
       }
     } catch (e) {

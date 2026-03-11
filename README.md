@@ -66,6 +66,32 @@ All CSS and JS are inlined directly in [index.html](index.html) — no external 
 
 Initialization happens automatically on `DOMContentLoaded`.
 
+### WordPress (iframe embed)
+
+The recommended approach for WordPress is to host [index.html](index.html) as a static file (uploaded via FTP, a CDN, or GitHub Pages) and embed it using a **Custom HTML block**:
+
+```html
+<script>
+  window.PickerWheelConfig = {
+    shareUrl: 'https://yoursite.com/your-page-slug',
+    fanfareUrl: 'https://yoursite.com/wp-content/uploads/fanfare.mp3'
+  };
+</script>
+<iframe
+  src="https://yoursite.com/picker-wheel/index.html"
+  width="100%"
+  height="850"
+  style="border:none;"
+  title="Picker Wheel">
+</iframe>
+```
+
+Key points for WordPress embedding:
+- **`shareUrl`** — set this to the WordPress page URL so social shares link to your page, not the iframe source file.
+- **`fanfareUrl`** — the default fanfare audio is loaded from an external host. Some managed WordPress hosts block cross-origin audio via their Content Security Policy. Upload your own MP3 via the WordPress Media Library and set this to its URL. To disable the sound entirely, set `fanfareUrl: ''`.
+- The `<script>` block must appear **before** the `<iframe>` tag so config is set before the widget initialises.
+- WordPress may strip `<script>` tags for non-administrator roles. Use a plugin such as [WPCode](https://wpcode.com/) if you cannot save the script, or ensure you are editing as an administrator.
+
 ## Layout
 
 - Desktop/tablet (wide screens): Wheel on the left, inputs and options list in a right-hand column.
@@ -103,47 +129,66 @@ Behavior notes:
 - It pauses immediately on hover, pointer/touch down, and while spinning.
 - It resumes when the pointer leaves or the spin finishes.
 
-## Runtime Palette, Theme & Share URL Override (JS)
+## Runtime Config & Theme Override (JS)
 
-You can override the slice palette, CSS variables, and share URL at runtime by inserting a small `<script>` above the main `<script>` block in [index.html](index.html):
+You can override behaviour, branding, and CSS variables at runtime by inserting a small `<script>` above the main `<script>` block in [index.html](index.html):
 
 ```html
 <script>
-	window.PickerWheelConfig = {
-		palette: ['#6c5ce7', '#74b9ff', '#55efc4', '#ffeaa7', '#fd79a8'],
-		headerImage: 'https://example.com/logo.png',  // or use a data URI
-		shareUrl: 'https://your-website.com/'  // URL for social media sharing
-	};
+  window.PickerWheelConfig = {
+    palette:     ['#6c5ce7', '#74b9ff', '#55efc4', '#ffeaa7', '#fd79a8'],
+    headerImage: 'https://example.com/logo.png',  // or a data URI
+    shareUrl:    'https://your-website.com/',      // URL for social sharing
+    fanfareUrl:  'https://your-website.com/wp-content/uploads/fanfare.mp3' // winner sound
+  };
 
-	window.PickerWheelTheme = {
-		'--color-primary': '#6c5ce7',
-		'--color-text': '#222',
-		'--color-accent': '#e17055'
-	};
+  window.PickerWheelTheme = {
+    '--color-primary': '#6c5ce7',
+    '--color-text':    '#222',
+    '--color-accent':  '#e17055'
+  };
 </script>
 ```
 
-Place this block before the main picker wheel `<script>` so the overrides are applied. Overrides target the widget container's variables.
+Place this block before the main picker wheel `<script>` so the overrides are applied.
 
-### Share URL Configuration
-By default, the `shareUrl` is automatically set to the current page's URL (`window.location.origin + pathname`). This ensures that when the widget is embedded, shares link back to the site where it's hosted.
+### `palette`
+Array of hex color strings for wheel slices. Cycles through the list as options are added. Falls back to the built-in pastel palette if not set.
 
-You can optionally override this with a custom URL via config if needed:
-- Point to a different website or landing page
-- Track shares with custom UTM parameters or referral codes
-- Use different URLs based on deployment context
+### `headerImage`
+URL or data URI for the image displayed at the top of the winner modal and on downloaded result cards. Defaults to the built-in logo if not set.
 
-Example override:
+### `shareUrl`
+The URL included in social share messages. Defaults to `window.location.origin + pathname` (the current page URL).
+
+Override when:
+- Embedded in a WordPress iframe — set to the WordPress page URL so shares link to your page, not the iframe source.
+- Adding UTM parameters or referral codes.
+- Deploying in a context where `window.location` doesn't reflect the canonical URL.
+
+Example:
 ```javascript
 window.PickerWheelConfig = {
   shareUrl: 'https://your-website.com/?utm_source=picker_wheel'
 };
 ```
 
-Default (auto-detected): Current page URL
+### `fanfareUrl`
+URL of the MP3 audio file played when a winner is selected. Defaults to a built-in external MP3.
 
-### Header Image Customization
-The `headerImage` option allows you to customize the image displayed at the top of the winner modal and result card. Provide any valid image URL or data URI. If not specified, the default logo will be shown.
+Override when:
+- Your WordPress host's Content Security Policy blocks cross-origin audio (a common restriction on managed hosts). Upload your own MP3 via the WordPress Media Library and set this to its URL.
+- You want a different sound.
+- You want to disable the fanfare entirely — set `fanfareUrl: ''`.
+
+Example:
+```javascript
+window.PickerWheelConfig = {
+  fanfareUrl: 'https://yoursite.com/wp-content/uploads/fanfare.mp3'
+};
+// or to disable:
+window.PickerWheelConfig = { fanfareUrl: '' };
+```
 ## Behavior & Persistence
 
 - Options are stored in `localStorage` under the key `pickerWheelOptions`.
