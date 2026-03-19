@@ -41,16 +41,95 @@ A lightweight, dependency‑free picker wheel delivered as a single self-contain
 - Result timestamp automatically captured in filename
 
 ### Social Media Integration
-- Share directly to major platforms: Facebook, Twitter/X, WhatsApp, Instagram
-- Configurable share URL that links to your website or custom destination
-- Platform-specific sharing flows:
   - **Facebook & Twitter/X**: Message copied to clipboard and social intent window opens
   - **WhatsApp**: Web-based link with pre-filled message
   - **Instagram**: PNG downloaded and caption copied (manual paste flow)
-- Share URL is customizable via runtime config: `window.PickerWheelConfig = { shareUrl: 'your-url' }`
-- Native share fallback on supported platforms (mobile)
 
-## Quick Start
+## Customizing Styles with PickerWheelTheme
+
+PickerWheelTheme lets you change the look and feel of Picker Wheel by overriding built-in CSS variables. You cannot add new variables—only change the values of those already defined in the app.
+
+**How to use:**
+Set `window.PickerWheelTheme` before the main script in index.html, like this:
+
+```html
+<script>
+  window.PickerWheelTheme = {
+    '--color-primary': '#6c5ce7',      // Main button background
+    '--color-primary-border': '#5e54a4', // Button border/focus color
+    '--color-accent': '#ffb347',       // Accent color (delete/edit)
+    '--color-modal-bg': '#f8f8f8',     // Modal background
+    '--color-border': '#ddd',          // Neutral borders
+    '--color-text': '#333',            // Main text color
+    '--font-base': 'Arial, sans-serif', // Base font for app
+    '--font-heading': 'Georgia, serif', // Font for headings
+    '--control-height': '44px'         // Height for input/button controls
+    // Only override existing variables; new ones won’t have any effect
+  };
+</script>
+```
+
+**What each variable controls:**
+- `--color-primary`: Main button backgrounds (e.g., Add, Spin, Clear)
+- `--color-primary-border`: Button/input border color on focus
+- `--color-accent`: Accent color for delete/edit actions and wheel arrow
+- `--color-modal-bg`: Background color for modals and result cards
+- `--color-border`: Border color for inputs, options, and modal
+- `--color-text`: Main text color throughout the app
+- `--font-base`: Font family for most text
+- `--font-heading`: Font family for headings and modal titles
+- `--control-height`: Height for input fields and buttons
+
+**Note:**
+You can only override the variables listed above. Adding new variables will not change the app unless the code itself is updated.
+
+
+## Customizing Behavior with PickerWheelConfig
+
+PickerWheelConfig lets you control the app’s behavior, branding, and sharing features. Set it before the main script in index.html to override defaults.
+
+**How to use:**
+Insert a `<script>` block above the main picker wheel script in index.html:
+
+```html
+<script>
+  window.PickerWheelConfig = {
+    palette:     ['#6c5ce7', '#74b9ff', '#55efc4', '#ffeaa7', '#fd79a8'], // Custom slice colors
+    headerImage: 'https://example.com/logo.png',  // Logo for winner modal and result card
+    shareUrl:    'https://your-website.com/',     // URL for social sharing
+    fanfareUrl:  'https://your-website.com/wp-content/uploads/fanfare.mp3' // Winner sound
+  };
+</script>
+```
+
+**What each property controls:**
+- `palette`: Array of hex color strings for wheel slices. Cycles through the list as options are added. If not set, uses the built-in pastel palette.
+- `headerImage`: URL or data URI for the image shown at the top of the winner modal and on downloaded result cards. Defaults to the built-in logo.
+- `shareUrl`: The URL included in social share messages. Defaults to the current page URL. Override for iframe embeds, custom tracking, or canonical links.
+- `fanfareUrl`: URL of the MP3 audio file played when a winner is selected. Defaults to a built-in external MP3. Set to '' to disable the sound.
+
+**Examples:**
+- To change slice colors:
+  ```javascript
+  window.PickerWheelConfig = { palette: ['#ff0000', '#00ff00', '#0000ff'] };
+  ```
+- To use your own logo:
+  ```javascript
+  window.PickerWheelConfig = { headerImage: 'https://yourdomain.com/logo.png' };
+  ```
+- To set a custom share URL:
+  ```javascript
+  window.PickerWheelConfig = { shareUrl: 'https://yourdomain.com/picker' };
+  ```
+- To change or disable the winner sound:
+  ```javascript
+  window.PickerWheelConfig = { fanfareUrl: 'https://yourdomain.com/fanfare.mp3' };
+  // or
+  window.PickerWheelConfig = { fanfareUrl: '' };
+  ```
+
+**Note:**
+Always place PickerWheelConfig before the main script so your settings are applied when the widget initializes.
 
 - Open [index.html](index.html) directly in your browser.
 - Type options and click “Add” (need at least 2).
